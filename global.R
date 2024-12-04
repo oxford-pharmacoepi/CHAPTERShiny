@@ -17,6 +17,7 @@ library(pbs)
 library(stats)
 library(DiagrammeR)
 library(forcats)
+library(zoo)
 
 formatEstimateName <- function(result,
                                estimateNameFormat = NULL,
@@ -389,7 +390,7 @@ incidence_estimates <- incidence_estimates %>%
           year_month = paste(year_index, sprintf("%02d", month_index), sep = "-")) %>%
   select(-"...1") %>%
   rename("database_name" = "cdm_name") %>%
-  dplyr::filter(incidence_start_date < as.Date("2023-06-01")) %>%
+#  dplyr::filter(incidence_start_date < as.Date("2023-06-01")) %>%
   dplyr::mutate(denominator_target_cohort_name =
                   dplyr::if_else(is.na(denominator_target_cohort_name), "all_population",
                                  denominator_target_cohort_name))
@@ -630,3 +631,34 @@ plotAttHere <- function (result) {
   }
   return(DiagrammeR::render_graph(xg))
 }
+
+# Add these countries COVID-19 cases-related and stringency index-related info from official sources
+# to put in the plots
+
+# Missing UK and US, grab from other sources
+covid_cases <- read.csv(here("data", "covid_cases.csv")) %>%
+  dplyr::tibble() %>%
+  dplyr::filter(countriesAndTerritories %in% c("France", "Romania", "Spain", "Italy", "Belgium")) %>%
+  dplyr::select("month", "year", "cases", "country" = "countriesAndTerritories") %>%
+  dplyr::group_by(month, year, country) %>%
+  dplyr::summarise(cases = sum(cases))
+
+# Do we want to add both for vacc and non vacc people? Right now just weighted average
+covid_si <- read.csv(here("data", "covid_si.csv")) %>%
+  dplyr::tibble() %>%
+  dplyr::filter(Entity %in% c("France", "Romania", "Spain", "Italy", "Belgium", "United Kingdom", "United States")) %>%
+  dplyr::select("country" = "Entity", "date" = "Day", "si" = "Stringency.index..weighted.average.") %>%
+  dplyr::mutate(date = as.Date(date))
+
+# To retrieve information on country per database
+countriesDb <- list(
+  "CPRDGOLD" = "United Kingdom",
+  "PharMetrics" = "United States",
+  "THINBE" = "Belgium",
+  "THINES" = "Spain",
+  "THINFR" = "France",
+  "THINIT" = "Italy",
+  "THINRO" = "Romania",
+  "THINUK" = "United Kingdom"
+)
+

@@ -260,6 +260,90 @@ of the patients for all relevant conditions. All results have been stratified by
                                                  grVizOutput('plot_infection_attrition', height = "800px") %>% withSpinner())
                             )
                    ) ,
+                   ## Incidence comparison SI------
+                   tabPanel("Population Incidence with Stringency Index",
+                            tags$h3("Incidence Estimates"),
+                            tags$h5("Incidence estimates are shown below. Data from COVID-19 Stringency Index for comparison has been extracted from https://ourworldindata.org/covid-stringency-index ."),
+                            tags$hr(),
+                            tags$h5("Database and Study Outcome"),
+                            div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                pickerInput(inputId = "incidence_comp_database_name_selector",
+                                            label = "Database",
+                                            choices = unique(incidence_estimates$database_name),
+                                            selected = unique(incidence_estimates$database_name),
+                                            options = list(
+                                              `actions-box` = TRUE,
+                                              size = 10,
+                                              `selected-text-format` = "count > 3"),
+                                            multiple = FALSE)
+                            ),
+                            div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                pickerInput(inputId = "incidence_comp_outcome_cohort_name_selector",
+                                            label = "Outcome",
+                                            choices = sort(unique(incidence_estimates$outcome_cohort_name)),
+                                            selected = c("Asthma"),
+                                            options = list(
+                                              `actions-box` = TRUE,
+                                              size = 10,
+                                              `selected-text-format` = "count > 3"),
+                                            multiple = TRUE)
+                            ),
+                            tags$hr(),
+                            tags$h5("Population Settings"),
+                            div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                pickerInput(inputId = "incidence_comp_denominator_age_group_selector",
+                                            label = "Age group",
+                                            choices = unique(incidence_estimates$denominator_age_group),
+                                            selected = c("0 to 150"),
+                                            options = list(
+                                              `actions-box` = TRUE,
+                                              size = 10,
+                                              `selected-text-format` = "count > 3"),
+                                            multiple = TRUE)
+                            ),
+                            div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                pickerInput(inputId = "incidence_comp_denominator_sex_selector",
+                                            label = "Sex",
+                                            choices = unique(incidence_estimates$denominator_sex),
+                                            selected = "Both",
+                                            options = list(
+                                              `actions-box` = TRUE,
+                                              size = 10,
+                                              `selected-text-format` = "count > 3"),
+                                            multiple = TRUE)
+                            ),
+                            tags$hr(),
+                            tags$h5("Analysis Settings"),
+                            div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                pickerInput(inputId = "incidence_comp_start_date_selector",
+                                            label = "Incidence Start Date",
+                                            choices = sort(as.character(unique(incidence_estimates$incidence_start_date))),
+                                            selected = sort(as.character(unique(incidence_estimates$incidence_start_date))),
+                                            options = list(
+                                              `actions-box` = TRUE,
+                                              size = 10,
+                                              `selected-text-format` = "count > 3"),
+                                            multiple = TRUE)
+                            ),
+                            tabsetPanel(type = "tabs",
+                                        tabPanel("Plot of Estimates",
+                                                 tags$hr(),
+                                                 tags$h5("Plotting Options"),
+                                                 div(style="display: inline-block;vertical-align:top; width: 150px;",
+                                                     pickerInput(inputId = "incidence_comp_sma",
+                                                                 label = "Smooth incidence",
+                                                                 choices = c("yes",
+                                                                             "no"),
+                                                                 selected = "no",
+                                                                 options = list(
+                                                                   `actions-box` = TRUE,
+                                                                   size = 10,
+                                                                   `selected-text-format` = "count > 3"),
+                                                                 multiple = FALSE)
+                                                 ),
+                                                 plotlyOutput('plot_incidence_comparison', height = "700px") %>% withSpinner() )
+                            )
+                   ) ,
                    ## Population characteristics ------
                    tabPanel("Population Characteristics",
                             tags$h3("Study Population Characteristics"),
@@ -409,7 +493,9 @@ of the patients for all relevant conditions. All results have been stratified by
                                         tabPanel("Plot of Estimates",
                                                  plotlyOutput('plot_segmented_regression', height = "800px") %>% withSpinner()),
                                         tabPanel("Plot of Residuals",
-                                                 plotOutput('plot_segmented_regression_residuals', height = "600px") %>% withSpinner())
+                                                 plotOutput('plot_segmented_regression_residuals', height = "600px") %>% withSpinner()),
+                                        tabPanel("Segmented Regression monthly",
+                                                 DTOutput('tbl_segmented_regression_monthly') %>% withSpinner())
 
                             )
                    )
